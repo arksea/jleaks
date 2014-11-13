@@ -1,0 +1,59 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+String mavenArtifactId = name
+String mavenGroupId = 'arksea'
+String mavenVersion = '1.0.0-SNAPSHOT'
+
+group = mavenGroupId
+version = mavenVersion
+
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from the source files.') {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+        groupId = mavenGroupId
+        artifactId = mavenArtifactId
+        version = mavenVersion
+    }
+}
+
+sourceCompatibility = '1.7'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+//将更新cache的最大延迟时间改为10分钟（默认为24小时）
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://maven.oschina.net/content/repositories/thirdparty/" }
+}
+
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        repository(url: "") {
+//            authentication(userName: "", password: "")
+//        }
+//        snapshotRepository(url: "") {
+//            authentication(userName: "", password: "")
+//        }
+//    }
+//}.dependsOn(assemble)
+
+dependencies {
+    testCompile "junit:junit:4.10"
+    compile "org.slf4j:slf4j-api:1.6.1"
+    compile "org.slf4j:slf4j-log4j12:1.6.1"
+    compile "log4j:log4j:1.2.16"
+    compile "arksea:jactor:1.0.1-SNAPSHOT"
+}
