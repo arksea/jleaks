@@ -2,7 +2,6 @@ jleaks
 ======
     Java Resource Leaks Monitor，用于Java资源泄露检测。
  
-库依赖：[一个微型Actor库](https://github.com/arksea/jactor)
 
   当程序库的作者向用户提供一个使用后需要释放资源的类，通常都苦恼如何保证用户的这个行为。Java的类不像C++拥有析构函数，对于库的提供者，C++程序员面对上述问题只要简单的在析构函数中释放其资源即可，但是Java通常是提供一个close()方法给使用者，要求使用者主动调用去释放资源，但是如果使用者没有调用，作为库本身也没有什么办法。这个资源释放的需求，在复杂的系统中，有时会形成一个链条，任何一个环节用户疏忽了，都会造成之后所有的资源产生泄露。
 
@@ -10,7 +9,7 @@ jleaks
 
   使用这个类很简单，只要将资源注册一下即可。如果用户在使用这个资源对象后没有调用清除方法，这个类就会检测到并记录一条带有栈信息的日志去警告使用者，让我们可以很容易的找到资源创建的源头。
 
-  下面将演示这个类的两种使用模式，首先来看模式一。
+###下面将演示这个类的两种使用模式，首先来看模式一。
 
   假设我们的程序库有一个提供给用户的资源接口，我们可以让这个资源接口继承自IDisposable，并希望用户使用完后调用dispose()方法
 
@@ -74,7 +73,8 @@ Thread.sleep(5000);
 	at arksea.jleaks.demo.Main.main(Main.java:29)
 ```
 
-  第二种模式的使用情景是，这个资源是第三方提供的，并没有实现IDisposable接口
+###第二种模式
+  模式二的使用情景是，这个资源是第三方提供的，并没有实现IDisposable接口
   假设以下是第三方库的接口定义
 ```
 public interface IThirdPartyConnection extends Closeable{
@@ -111,4 +111,32 @@ Thread.sleep(5000);
 	at arksea.jleaks.ResourceLeaksMonitor.register(ResourceLeaksMonitor.java:110)
 	at arksea.jleaks.demo1.ConnectionFactory.create(ConnectionFactory.java:14)
 	at arksea.jleaks.demo.Main.main(Main.java:25)
+```
+
+jleaks库已上传到OSChina的Maven库，可以在项目中直接引用：
+
+###gradle
+```
+repositories {
+    maven { url "http://maven.oschina.net/content/repositories/thirdparty" }
+}
+
+dependencies {
+    compile "net.arksea:jleaks:1.0.0"
+} 
+```
+###maven
+```
+<repositories>
+  <repository>
+    <id>public</id>
+    <url>http://maven.oschina.net/content/repositories/thirdparty</url>
+  </repository>
+</repositories>
+ 
+<dependency>
+  <groupId>net.arksea</groupId>
+  <artifactId>jleaks</artifactId>
+  <version>1.0.0</version>
+</dependency>
 ```
